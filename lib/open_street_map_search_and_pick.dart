@@ -145,6 +145,7 @@ class _OpenStreetMapSearchAndPickState
           var client = http.Client();
           String url =
               '${widget.baseUri}/reverse?format=json&lat=${event.camera.center.latitude}&lon=${event.camera.center.longitude}&zoom=18&addressdetails=1';
+          _isLocationLoading.value = true;
 
           var response = await client.get(Uri.parse(url));
           // var response = await client.post(Uri.parse(url));
@@ -152,6 +153,8 @@ class _OpenStreetMapSearchAndPickState
               as Map<dynamic, dynamic>;
 
           _searchController.text = decodedResponse['display_name'];
+          _isLocationLoading.value = false;
+
           setState(() {});
         }
       },
