@@ -395,7 +395,8 @@ class _OpenStreetMapSearchAndPickState
                                       LatLng(_options[index].lat,
                                           _options[index].lon),
                                       15.0);
-
+                                  _searchController.text =
+                                      _options[index].displayname;
                                   _focusNode.unfocus();
                                   _options.clear();
                                   setState(() {});
