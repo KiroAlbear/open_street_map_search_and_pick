@@ -65,6 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
         ),
         body: OpenStreetMapSearchAndPick(
+          buttonTextColor: Colors.white,
           buttonTextStyle:
               const TextStyle(fontSize: 18, fontStyle: FontStyle.normal),
           buttonColor: Colors.blue,

@@ -311,11 +311,11 @@ class _OpenStreetMapSearchAndPickState
                             hintText: widget.hintText,
                             border: inputBorder,
                             focusedBorder: inputFocusBorder,
-                            prefixIconConstraints:
-                                BoxConstraints(maxWidth: 40, maxHeight: 40),
-                            prefixIcon: SizedBox(
+                            suffixIconConstraints:
+                                BoxConstraints(maxWidth: 45, maxHeight: 45),
+                            suffixIcon: SizedBox(
                               child: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(12.0),
                                 child: ValueListenableBuilder<bool>(
                                   valueListenable: _isLocationLoading,
                                   builder: (context, value, child) {
