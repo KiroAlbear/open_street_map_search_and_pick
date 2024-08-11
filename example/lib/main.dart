@@ -74,6 +74,8 @@ class _MyHomePageState extends State<MyHomePage> {
           buttonHeight: 60,
           setLocationButtonBorderRadious: 10,
           buttonWidth: double.infinity,
+          latitude: 37.7749,
+          longitude: -122.4194,
           onPicked: (pickedData) {
             print(pickedData.latLong.latitude);
             print(pickedData.latLong.longitude);

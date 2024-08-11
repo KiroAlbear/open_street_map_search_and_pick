@@ -30,6 +30,8 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   final String baseUri;
   final double mapHeight;
   final double setLocationButtonBorderRadious;
+  final double? longitude;
+  final double? latitude;
 
   const OpenStreetMapSearchAndPick({
     Key? key,
@@ -54,6 +56,8 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
     this.buttonWidth = 200,
     this.baseUri = 'https://nominatim.openstreetmap.org',
     this.locationPinIcon = Icons.location_on,
+    this.latitude,
+    this.longitude,
   }) : super(key: key);
 
   @override
@@ -71,6 +75,7 @@ class _OpenStreetMapSearchAndPickState
   var client = http.Client();
   late Future<Position?> latlongFuture;
   final ValueNotifier<bool> _isLocationLoading = ValueNotifier(false);
+  late final Position _currentLocation;
 
   Future<Position?> getCurrentPosLatLong() async {
     LocationPermission locationPermission = await Geolocator.checkPermission();
@@ -80,11 +85,28 @@ class _OpenStreetMapSearchAndPickState
       locationPermission = await Geolocator.requestPermission();
       return await getPosition(locationPermission);
     }
+    _currentLocation = await Geolocator.getCurrentPosition();
 
-    /// have location permission
-    Position position = await Geolocator.getCurrentPosition();
-    setNameCurrentPosAtInit(position.latitude, position.longitude);
-    return position;
+    if (widget.latitude != null && widget.longitude != null) {
+      setNameCurrentPosAtInit(widget.latitude!, widget.longitude!);
+      return Position(
+          latitude: widget.latitude!,
+          longitude: widget.longitude!,
+          timestamp: DateTime.now(),
+          accuracy: 0,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          altitudeAccuracy: 0,
+          speedAccuracy: 0,
+          headingAccuracy: 0);
+    } else {
+      /// have location permission
+
+      setNameCurrentPosAtInit(
+          _currentLocation.latitude, _currentLocation.longitude);
+      return _currentLocation;
+    }
   }
 
   Future<Position?> getPosition(LocationPermission locationPermission) async {
@@ -93,6 +115,7 @@ class _OpenStreetMapSearchAndPickState
       return null;
     }
     Position position = await Geolocator.getCurrentPosition();
+
     setNameCurrentPosAtInit(position.latitude, position.longitude);
     return position;
   }
@@ -294,7 +317,8 @@ class _OpenStreetMapSearchAndPickState
                         onPressed: () async {
                           if (mapCentre != null) {
                             _mapController.move(
-                                LatLng(mapCentre.latitude, mapCentre.longitude),
+                                LatLng(_currentLocation.latitude,
+                                    _currentLocation.longitude),
                                 _mapController.camera.zoom);
                           } else {
                             _mapController.move(LatLng(50.5, 30.51),
