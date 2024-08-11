@@ -66,7 +66,7 @@ class _OpenStreetMapSearchAndPickState
   Timer? _debounce;
   var client = http.Client();
   late Future<Position?> latlongFuture;
-  final ValueNotifier<bool> _isLocationLoading = ValueNotifier(true);
+  final ValueNotifier<bool> _isLocationLoading = ValueNotifier(false);
 
   Future<Position?> getCurrentPosLatLong() async {
     LocationPermission locationPermission = await Geolocator.checkPermission();
