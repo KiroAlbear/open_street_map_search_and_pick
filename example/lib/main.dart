@@ -65,11 +65,15 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
         ),
         body: OpenStreetMapSearchAndPick(
+          mapHeight: 400,
           buttonTextColor: Colors.white,
           buttonTextStyle:
               const TextStyle(fontSize: 18, fontStyle: FontStyle.normal),
           buttonColor: Colors.blue,
           buttonText: 'Set Current Location',
+          buttonHeight: 60,
+          setLocationButtonBorderRadious: 10,
+          buttonWidth: double.infinity,
           onPicked: (pickedData) {
             print(pickedData.latLong.latitude);
             print(pickedData.latLong.longitude);

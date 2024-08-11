@@ -28,10 +28,13 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   final double buttonWidth;
   final TextStyle buttonTextStyle;
   final String baseUri;
+  final double mapHeight;
+  final double setLocationButtonBorderRadious;
 
   const OpenStreetMapSearchAndPick({
     Key? key,
     required this.onPicked,
+    this.mapHeight = 300,
     this.zoomOutIcon = Icons.zoom_out_map,
     this.zoomInIcon = Icons.zoom_in_map,
     this.currentLocationIcon = Icons.my_location,
@@ -39,6 +42,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
     this.locationPinIconColor = Colors.blue,
     this.textFieldProgressBarColor = Colors.blue,
     this.locationPinText = 'Location',
+    this.setLocationButtonBorderRadious = 100,
     this.locationPinTextStyle = const TextStyle(
         fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
     this.hintText = 'Search Location',
@@ -94,8 +98,8 @@ class _OpenStreetMapSearchAndPickState
   }
 
   void setNameCurrentPos() async {
-    double latitude = _mapController.center.latitude;
-    double longitude = _mapController.center.longitude;
+    double latitude = _mapController.camera.center.latitude;
+    double longitude = _mapController.camera.center.longitude;
     if (kDebugMode) {
       print(latitude);
     }
@@ -199,239 +203,253 @@ class _OpenStreetMapSearchAndPickState
           mapCentre = LatLng(snapshot.data!.latitude, snapshot.data!.longitude);
         }
         return SafeArea(
-          child: Stack(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Positioned.fill(
-                child: FlutterMap(
-                  options: MapOptions(
-                      center: mapCentre, zoom: 15.0, maxZoom: 18, minZoom: 6),
-                  mapController: _mapController,
+              SizedBox(
+                height: widget.mapHeight,
+                child: Stack(
                   children: [
-                    TileLayer(
-                      urlTemplate:
-                          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                      subdomains: const ['a', 'b', 'c'],
-                      // attributionBuilder: (_) {
-                      //   return Text("© OpenStreetMap contributors");
-                      // },
+                    Positioned.fill(
+                      child: FlutterMap(
+                        options: MapOptions(
+                            initialCenter: mapCentre!,
+                            initialZoom: 15.0,
+                            maxZoom: 18,
+                            minZoom: 6),
+                        mapController: _mapController,
+                        children: [
+                          TileLayer(
+                            urlTemplate:
+                                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                            // subdomains: const ['a', 'b', 'c'],
+                            // attributionBuilder: (_) {
+                            //   return Text("© OpenStreetMap contributors");
+                            // },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(widget.locationPinText,
+                                  style: widget.locationPinTextStyle,
+                                  textAlign: TextAlign.center),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 50),
+                                child: Icon(
+                                  widget.locationPinIcon,
+                                  size: 50,
+                                  color: widget.locationPinIconColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 180,
+                      right: 5,
+                      child: FloatingActionButton(
+                        heroTag: 'btn1',
+                        backgroundColor: widget.buttonColor,
+                        onPressed: () {
+                          _mapController.move(_mapController.camera.center,
+                              _mapController.camera.zoom + 1);
+                        },
+                        child: Icon(
+                          widget.zoomInIcon,
+                          color: widget.buttonTextColor,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 120,
+                      right: 5,
+                      child: FloatingActionButton(
+                        heroTag: 'btn2',
+                        backgroundColor: widget.buttonColor,
+                        onPressed: () {
+                          _mapController.move(_mapController.camera.center,
+                              _mapController.camera.zoom - 1);
+                        },
+                        child: Icon(
+                          widget.zoomOutIcon,
+                          color: widget.buttonTextColor,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 60,
+                      right: 5,
+                      child: FloatingActionButton(
+                        heroTag: 'btn3',
+                        backgroundColor: widget.buttonColor,
+                        onPressed: () async {
+                          if (mapCentre != null) {
+                            _mapController.move(
+                                LatLng(mapCentre.latitude, mapCentre.longitude),
+                                _mapController.camera.zoom);
+                          } else {
+                            _mapController.move(LatLng(50.5, 30.51),
+                                _mapController.camera.zoom);
+                          }
+                          setNameCurrentPos();
+                        },
+                        child: Icon(
+                          widget.currentLocationIcon,
+                          color: widget.buttonTextColor,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        margin: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Column(
+                          children: [
+                            TextFormField(
+                                controller: _searchController,
+                                focusNode: _focusNode,
+                                decoration: InputDecoration(
+                                  hintText: widget.hintText,
+                                  border: inputBorder,
+                                  focusedBorder: inputFocusBorder,
+                                  suffixIconConstraints: BoxConstraints(
+                                      maxWidth: 45, maxHeight: 45),
+                                  suffixIcon: SizedBox(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: ValueListenableBuilder<bool>(
+                                        valueListenable: _isLocationLoading,
+                                        builder: (context, value, child) {
+                                          return !value
+                                              ? SizedBox()
+                                              : CircularProgressIndicator(
+                                                  color: widget
+                                                      .textFieldProgressBarColor,
+                                                );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                onChanged: (String value) {
+                                  if (_debounce?.isActive ?? false) {
+                                    _debounce?.cancel();
+                                  }
+
+                                  _debounce =
+                                      Timer(const Duration(milliseconds: 1000),
+                                          () async {
+                                    if (kDebugMode) {
+                                      print(value);
+                                    }
+                                    var client = http.Client();
+                                    try {
+                                      String url =
+                                          '${widget.baseUri}/search?q=$value&format=json&polygon_geojson=1&addressdetails=1';
+                                      if (kDebugMode) {
+                                        print(url);
+                                      }
+                                      _isLocationLoading.value = true;
+                                      var response =
+                                          await client.get(Uri.parse(url));
+                                      // var response = await client.post(Uri.parse(url));
+                                      var decodedResponse = jsonDecode(
+                                              utf8.decode(response.bodyBytes))
+                                          as List<dynamic>;
+                                      if (kDebugMode) {
+                                        print(decodedResponse);
+                                      }
+                                      _options = decodedResponse
+                                          .map(
+                                            (e) => OSMdata(
+                                              displayname: e['display_name'],
+                                              lat: double.parse(e['lat']),
+                                              lon: double.parse(e['lon']),
+                                            ),
+                                          )
+                                          .toList();
+                                      _isLocationLoading.value = false;
+                                      setState(() {});
+                                    } finally {
+                                      _isLocationLoading.value = false;
+                                      client.close();
+                                    }
+
+                                    setState(() {});
+                                  });
+                                }),
+                            StatefulBuilder(
+                              builder: ((context, setState) {
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount:
+                                      _options.length > 5 ? 5 : _options.length,
+                                  itemBuilder: (context, index) {
+                                    return ListTile(
+                                      title: Text(_options[index].displayname),
+                                      subtitle: Text(
+                                          '${_options[index].lat},${_options[index].lon}'),
+                                      onTap: () {
+                                        _mapController.move(
+                                            LatLng(_options[index].lat,
+                                                _options[index].lon),
+                                            15.0);
+                                        _searchController.text =
+                                            _options[index].displayname;
+                                        _focusNode.unfocus();
+                                        _options.clear();
+                                        setState(() {});
+                                      },
+                                    );
+                                  },
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(widget.locationPinText,
-                            style: widget.locationPinTextStyle,
-                            textAlign: TextAlign.center),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 50),
-                          child: Icon(
-                            widget.locationPinIcon,
-                            size: 50,
-                            color: widget.locationPinIconColor,
-                          ),
-                        ),
-                      ],
-                    ),
+              SizedBox(
+                height: 10,
+              ),
+              SizedBox(
+                height: widget.buttonHeight,
+                width: widget.buttonWidth,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: WideButton(
+                    widget.buttonText,
+                    setLocationButtonBorderRadious:
+                        widget.setLocationButtonBorderRadious,
+                    textStyle: widget.buttonTextStyle,
+                    onPressed: () async {
+                      final value = await pickData();
+                      widget.onPicked(value);
+                    },
+                    backgroundColor: widget.buttonColor,
+                    foregroundColor: widget.buttonTextColor,
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 180,
-                right: 5,
-                child: FloatingActionButton(
-                  heroTag: 'btn1',
-                  backgroundColor: widget.buttonColor,
-                  onPressed: () {
-                    _mapController.move(
-                        _mapController.center, _mapController.zoom + 1);
-                  },
-                  child: Icon(
-                    widget.zoomInIcon,
-                    color: widget.buttonTextColor,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 120,
-                right: 5,
-                child: FloatingActionButton(
-                  heroTag: 'btn2',
-                  backgroundColor: widget.buttonColor,
-                  onPressed: () {
-                    _mapController.move(
-                        _mapController.center, _mapController.zoom - 1);
-                  },
-                  child: Icon(
-                    widget.zoomOutIcon,
-                    color: widget.buttonTextColor,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 60,
-                right: 5,
-                child: FloatingActionButton(
-                  heroTag: 'btn3',
-                  backgroundColor: widget.buttonColor,
-                  onPressed: () async {
-                    if (mapCentre != null) {
-                      _mapController.move(
-                          LatLng(mapCentre.latitude, mapCentre.longitude),
-                          _mapController.zoom);
-                    } else {
-                      _mapController.move(
-                          LatLng(50.5, 30.51), _mapController.zoom);
-                    }
-                    setNameCurrentPos();
-                  },
-                  child: Icon(
-                    widget.currentLocationIcon,
-                    color: widget.buttonTextColor,
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  margin: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Column(
-                    children: [
-                      TextFormField(
-                          controller: _searchController,
-                          focusNode: _focusNode,
-                          decoration: InputDecoration(
-                            hintText: widget.hintText,
-                            border: inputBorder,
-                            focusedBorder: inputFocusBorder,
-                            suffixIconConstraints:
-                                BoxConstraints(maxWidth: 45, maxHeight: 45),
-                            suffixIcon: SizedBox(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: ValueListenableBuilder<bool>(
-                                  valueListenable: _isLocationLoading,
-                                  builder: (context, value, child) {
-                                    return !value
-                                        ? SizedBox()
-                                        : CircularProgressIndicator(
-                                            color: widget
-                                                .textFieldProgressBarColor,
-                                          );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                          onChanged: (String value) {
-                            if (_debounce?.isActive ?? false) {
-                              _debounce?.cancel();
-                            }
-
-                            _debounce = Timer(
-                                const Duration(milliseconds: 1000), () async {
-                              if (kDebugMode) {
-                                print(value);
-                              }
-                              var client = http.Client();
-                              try {
-                                String url =
-                                    '${widget.baseUri}/search?q=$value&format=json&polygon_geojson=1&addressdetails=1';
-                                if (kDebugMode) {
-                                  print(url);
-                                }
-                                _isLocationLoading.value = true;
-                                var response = await client.get(Uri.parse(url));
-                                // var response = await client.post(Uri.parse(url));
-                                var decodedResponse =
-                                    jsonDecode(utf8.decode(response.bodyBytes))
-                                        as List<dynamic>;
-                                if (kDebugMode) {
-                                  print(decodedResponse);
-                                }
-                                _options = decodedResponse
-                                    .map(
-                                      (e) => OSMdata(
-                                        displayname: e['display_name'],
-                                        lat: double.parse(e['lat']),
-                                        lon: double.parse(e['lon']),
-                                      ),
-                                    )
-                                    .toList();
-                                _isLocationLoading.value = false;
-                                setState(() {});
-                              } finally {
-                                _isLocationLoading.value = false;
-                                client.close();
-                              }
-
-                              setState(() {});
-                            });
-                          }),
-                      StatefulBuilder(
-                        builder: ((context, setState) {
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount:
-                                _options.length > 5 ? 5 : _options.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(_options[index].displayname),
-                                subtitle: Text(
-                                    '${_options[index].lat},${_options[index].lon}'),
-                                onTap: () {
-                                  _mapController.move(
-                                      LatLng(_options[index].lat,
-                                          _options[index].lon),
-                                      15.0);
-                                  _searchController.text =
-                                      _options[index].displayname;
-                                  _focusNode.unfocus();
-                                  _options.clear();
-                                  setState(() {});
-                                },
-                              );
-                            },
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: WideButton(
-                      widget.buttonText,
-                      textStyle: widget.buttonTextStyle,
-                      height: widget.buttonHeight,
-                      width: widget.buttonWidth,
-                      onPressed: () async {
-                        final value = await pickData();
-                        widget.onPicked(value);
-                      },
-                      backgroundColor: widget.buttonColor,
-                      foregroundColor: widget.buttonTextColor,
-                    ),
-                  ),
-                ),
-              )
             ],
           ),
         );
@@ -440,11 +458,11 @@ class _OpenStreetMapSearchAndPickState
   }
 
   Future<PickedData> pickData() async {
-    LatLong center = LatLong(
-        _mapController.center.latitude, _mapController.center.longitude);
+    LatLong center = LatLong(_mapController.camera.center.latitude,
+        _mapController.camera.center.longitude);
     var client = http.Client();
     String url =
-        '${widget.baseUri}/reverse?format=json&lat=${_mapController.center.latitude}&lon=${_mapController.center.longitude}&zoom=18&addressdetails=1';
+        '${widget.baseUri}/reverse?format=json&lat=${_mapController.camera.center.latitude}&lon=${_mapController.camera.center.longitude}&zoom=18&addressdetails=1';
 
     var response = await client.get(Uri.parse(url));
     // var response = await client.post(Uri.parse(url));

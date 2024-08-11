@@ -11,6 +11,7 @@ class WideButton extends StatelessWidget {
     this.backgroundColor = Colors.blue,
     this.foregroundColor = Colors.white,
     this.width = double.infinity,
+    this.setLocationButtonBorderRadious = 100,
     this.textStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
   }) : super(key: key);
 
@@ -22,6 +23,7 @@ class WideButton extends StatelessWidget {
   final Color backgroundColor;
   final TextStyle textStyle;
   final Color foregroundColor;
+  final double setLocationButtonBorderRadious;
   final void Function() onPressed;
 
   @override
@@ -37,6 +39,10 @@ class WideButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: backgroundColor,
             foregroundColor: foregroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(setLocationButtonBorderRadious),
+            ),
           ),
           onPressed: onPressed,
           child: Text(text, style: textStyle),
