@@ -198,6 +198,8 @@ class _OpenStreetMapSearchAndPickState
     super.dispose();
   }
 
+  final double actionButtonsShiftingValues = 20;
+
   @override
   Widget build(BuildContext context) {
     // String? _autocompleteSelection;
@@ -277,7 +279,7 @@ class _OpenStreetMapSearchAndPickState
                       ),
                     ),
                     Positioned(
-                      bottom: 180,
+                      bottom: 180 - actionButtonsShiftingValues,
                       right: 5,
                       child: FloatingActionButton(
                         heroTag: 'btn1',
@@ -293,7 +295,7 @@ class _OpenStreetMapSearchAndPickState
                       ),
                     ),
                     Positioned(
-                      bottom: 120,
+                      bottom: 120 - actionButtonsShiftingValues,
                       right: 5,
                       child: FloatingActionButton(
                         heroTag: 'btn2',
@@ -309,7 +311,7 @@ class _OpenStreetMapSearchAndPickState
                       ),
                     ),
                     Positioned(
-                      bottom: 60,
+                      bottom: 60 - actionButtonsShiftingValues,
                       right: 5,
                       child: FloatingActionButton(
                         heroTag: 'btn3',
@@ -419,29 +421,32 @@ class _OpenStreetMapSearchAndPickState
                                 }),
                             StatefulBuilder(
                               builder: ((context, setState) {
-                                return ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount:
-                                      _options.length > 5 ? 5 : _options.length,
-                                  itemBuilder: (context, index) {
-                                    return ListTile(
-                                      title: Text(_options[index].displayname),
-                                      subtitle: Text(
-                                          '${_options[index].lat},${_options[index].lon}'),
-                                      onTap: () {
-                                        _mapController.move(
-                                            LatLng(_options[index].lat,
-                                                _options[index].lon),
-                                            15.0);
-                                        _searchController.text =
-                                            _options[index].displayname;
-                                        _focusNode.unfocus();
-                                        _options.clear();
-                                        setState(() {});
-                                      },
-                                    );
-                                  },
+                                return SizedBox(
+                                  height: _options.length > 2 ? 230 : null,
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    // physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: _options.length,
+                                    itemBuilder: (context, index) {
+                                      return ListTile(
+                                        title:
+                                            Text(_options[index].displayname),
+                                        subtitle: Text(
+                                            '${_options[index].lat},${_options[index].lon}'),
+                                        onTap: () {
+                                          _mapController.move(
+                                              LatLng(_options[index].lat,
+                                                  _options[index].lon),
+                                              15.0);
+                                          _searchController.text =
+                                              _options[index].displayname;
+                                          _focusNode.unfocus();
+                                          _options.clear();
+                                          setState(() {});
+                                        },
+                                      );
+                                    },
+                                  ),
                                 );
                               }),
                             ),
