@@ -32,33 +32,37 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   final double setLocationButtonBorderRadious;
   final double? longitude;
   final double? latitude;
+  final Widget? backArrowWidget;
+  final Widget? searchSuffixIcon;
 
-  const OpenStreetMapSearchAndPick({
-    Key? key,
-    required this.onPicked,
-    this.mapHeight = 300,
-    this.zoomOutIcon = Icons.zoom_out_map,
-    this.zoomInIcon = Icons.zoom_in_map,
-    this.currentLocationIcon = Icons.my_location,
-    this.buttonColor = Colors.blue,
-    this.locationPinIconColor = Colors.blue,
-    this.textFieldProgressBarColor = Colors.blue,
-    this.locationPinText = 'Location',
-    this.setLocationButtonBorderRadious = 100,
-    this.locationPinTextStyle = const TextStyle(
-        fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
-    this.hintText = 'Search Location',
-    this.buttonTextStyle = const TextStyle(
-        fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-    this.buttonTextColor = Colors.white,
-    this.buttonText = 'Set Current Location',
-    this.buttonHeight = 50,
-    this.buttonWidth = 200,
-    this.baseUri = 'https://nominatim.openstreetmap.org',
-    this.locationPinIcon = Icons.location_on,
-    this.latitude,
-    this.longitude,
-  }) : super(key: key);
+  const OpenStreetMapSearchAndPick(
+      {Key? key,
+      required this.onPicked,
+      this.mapHeight = 300,
+      this.zoomOutIcon = Icons.zoom_out_map,
+      this.zoomInIcon = Icons.zoom_in_map,
+      this.currentLocationIcon = Icons.my_location,
+      this.buttonColor = Colors.blue,
+      this.locationPinIconColor = Colors.blue,
+      this.textFieldProgressBarColor = Colors.blue,
+      this.locationPinText = 'Location',
+      this.setLocationButtonBorderRadious = 100,
+      this.locationPinTextStyle = const TextStyle(
+          fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
+      this.hintText = 'Search Location',
+      this.buttonTextStyle = const TextStyle(
+          fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+      this.buttonTextColor = Colors.white,
+      this.buttonText = 'Set Current Location',
+      this.buttonHeight = 50,
+      this.buttonWidth = 200,
+      this.baseUri = 'https://nominatim.openstreetmap.org',
+      this.locationPinIcon = Icons.location_on,
+      this.latitude,
+      this.longitude,
+      this.searchSuffixIcon,
+      this.backArrowWidget})
+      : super(key: key);
 
   @override
   State<OpenStreetMapSearchAndPick> createState() =>
@@ -206,6 +210,9 @@ class _OpenStreetMapSearchAndPickState
     OutlineInputBorder inputBorder = OutlineInputBorder(
       borderSide: BorderSide(color: widget.buttonColor),
     );
+    OutlineInputBorder enabledBorder = const OutlineInputBorder(
+      borderSide: BorderSide(color: Color(0xffE1E1E1)),
+    );
     OutlineInputBorder inputFocusBorder = OutlineInputBorder(
       borderSide: BorderSide(color: widget.buttonColor, width: 3.0),
     );
@@ -231,8 +238,107 @@ class _OpenStreetMapSearchAndPickState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                height: widget.mapHeight,
+              Container(
+                margin: const EdgeInsetsDirectional.only(end: 15, bottom: 15),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Row(
+                  children: [
+                    widget.backArrowWidget ?? const SizedBox(),
+                    Expanded(
+                      child: TextFormField(
+                          controller: _searchController,
+                          focusNode: _focusNode,
+                          decoration: InputDecoration(
+                              hintText: widget.hintText,
+                              border: inputBorder,
+                              focusedBorder: inputFocusBorder,
+                              enabledBorder: enabledBorder,
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 0),
+                              suffixIconConstraints: const BoxConstraints(
+                                  maxWidth: 45, maxHeight: 45),
+                              suffixIcon: SizedBox(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: ValueListenableBuilder<bool>(
+                                    valueListenable: _isLocationLoading,
+                                    builder: (context, value, child) {
+                                      return !value
+                                          ? const SizedBox()
+                                          : CircularProgressIndicator(
+                                              color: widget
+                                                  .textFieldProgressBarColor,
+                                            );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              prefixIcon: Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                    start: 10, end: 2),
+                                child:
+                                    widget.searchSuffixIcon ?? const SizedBox(),
+                              ),
+                              prefixIconConstraints: const BoxConstraints(
+                                  maxWidth: 45, maxHeight: 45)),
+                          onChanged: (String value) {
+                            if (_debounce?.isActive ?? false) {
+                              _debounce?.cancel();
+                            }
+
+                            _debounce = Timer(
+                                const Duration(milliseconds: 1000), () async {
+                              if (kDebugMode) {
+                                print(value);
+                              }
+                              var client = http.Client();
+                              Map<String, String> headers = {
+                                "User-Agent":
+                                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+                              };
+                              try {
+                                String url =
+                                    '${widget.baseUri}/search?q=$value&format=json&polygon_geojson=1&addressdetails=1';
+                                if (kDebugMode) {
+                                  print(url);
+                                }
+                                _isLocationLoading.value = true;
+                                var response = await client.get(Uri.parse(url),
+                                    headers: headers);
+                                // var response = await client.post(Uri.parse(url));
+                                var decodedResponse =
+                                    jsonDecode(utf8.decode(response.bodyBytes))
+                                        as List<dynamic>;
+                                if (kDebugMode) {
+                                  print(decodedResponse);
+                                }
+                                _options = decodedResponse
+                                    .map(
+                                      (e) => OSMdata(
+                                        displayname: e['display_name'],
+                                        lat: double.parse(e['lat']),
+                                        lon: double.parse(e['lon']),
+                                      ),
+                                    )
+                                    .toList();
+                                _isLocationLoading.value = false;
+                                setState(() {});
+                              } finally {
+                                _isLocationLoading.value = false;
+                                client.close();
+                              }
+
+                              setState(() {});
+                            });
+                          }),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
                 child: Stack(
                   children: [
                     Positioned.fill(
@@ -311,6 +417,41 @@ class _OpenStreetMapSearchAndPickState
                     //   ),
                     // ),
                     Positioned(
+                      left: 15,
+                      right: 15,
+                      child: StatefulBuilder(
+                        builder: ((context, setState) {
+                          return Container(
+                            color: Colors.white,
+                            height: _options.length > 2 ? 230 : null,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              // physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _options.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  title: Text(_options[index].displayname),
+                                  subtitle: Text(
+                                      '${_options[index].lat},${_options[index].lon}'),
+                                  onTap: () {
+                                    _mapController.move(
+                                        LatLng(_options[index].lat,
+                                            _options[index].lon),
+                                        15.0);
+                                    _searchController.text =
+                                        _options[index].displayname;
+                                    _focusNode.unfocus();
+                                    _options.clear();
+                                    setState(() {});
+                                  },
+                                );
+                              },
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                    Positioned(
                       bottom: 90 - actionButtonsShiftingValues,
                       right: 5,
                       child: FloatingActionButton(
@@ -323,7 +464,7 @@ class _OpenStreetMapSearchAndPickState
                                     _currentLocation.longitude),
                                 _mapController.camera.zoom);
                           } else {
-                            _mapController.move(LatLng(50.5, 30.51),
+                            _mapController.move(const LatLng(50.5, 30.51),
                                 _mapController.camera.zoom);
                           }
                           setNameCurrentPos();
@@ -334,131 +475,7 @@ class _OpenStreetMapSearchAndPickState
                         ),
                       ),
                     ),
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        margin: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Column(
-                          children: [
-                            TextFormField(
-                                controller: _searchController,
-                                focusNode: _focusNode,
-                                decoration: InputDecoration(
-                                  hintText: widget.hintText,
-                                  border: inputBorder,
-                                  focusedBorder: inputFocusBorder,
-                                  suffixIconConstraints: BoxConstraints(
-                                      maxWidth: 45, maxHeight: 45),
-                                  suffixIcon: SizedBox(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: ValueListenableBuilder<bool>(
-                                        valueListenable: _isLocationLoading,
-                                        builder: (context, value, child) {
-                                          return !value
-                                              ? SizedBox()
-                                              : CircularProgressIndicator(
-                                                  color: widget
-                                                      .textFieldProgressBarColor,
-                                                );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                onChanged: (String value) {
-                                  if (_debounce?.isActive ?? false) {
-                                    _debounce?.cancel();
-                                  }
 
-                                  _debounce =
-                                      Timer(const Duration(milliseconds: 1000),
-                                          () async {
-                                    if (kDebugMode) {
-                                      print(value);
-                                    }
-                                    var client = http.Client();
-                                    Map<String, String> headers = {
-                                      "User-Agent":
-                                          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
-                                    };
-                                    try {
-                                      String url =
-                                          '${widget.baseUri}/search?q=$value&format=json&polygon_geojson=1&addressdetails=1';
-                                      if (kDebugMode) {
-                                        print(url);
-                                      }
-                                      _isLocationLoading.value = true;
-                                      var response = await client.get(
-                                          Uri.parse(url),
-                                          headers: headers);
-                                      // var response = await client.post(Uri.parse(url));
-                                      var decodedResponse = jsonDecode(
-                                              utf8.decode(response.bodyBytes))
-                                          as List<dynamic>;
-                                      if (kDebugMode) {
-                                        print(decodedResponse);
-                                      }
-                                      _options = decodedResponse
-                                          .map(
-                                            (e) => OSMdata(
-                                              displayname: e['display_name'],
-                                              lat: double.parse(e['lat']),
-                                              lon: double.parse(e['lon']),
-                                            ),
-                                          )
-                                          .toList();
-                                      _isLocationLoading.value = false;
-                                      setState(() {});
-                                    } finally {
-                                      _isLocationLoading.value = false;
-                                      client.close();
-                                    }
-
-                                    setState(() {});
-                                  });
-                                }),
-                            StatefulBuilder(
-                              builder: ((context, setState) {
-                                return SizedBox(
-                                  height: _options.length > 2 ? 230 : null,
-                                  child: ListView.builder(
-                                    shrinkWrap: true,
-                                    // physics: const NeverScrollableScrollPhysics(),
-                                    itemCount: _options.length,
-                                    itemBuilder: (context, index) {
-                                      return ListTile(
-                                        title:
-                                            Text(_options[index].displayname),
-                                        subtitle: Text(
-                                            '${_options[index].lat},${_options[index].lon}'),
-                                        onTap: () {
-                                          _mapController.move(
-                                              LatLng(_options[index].lat,
-                                                  _options[index].lon),
-                                              15.0);
-                                          _searchController.text =
-                                              _options[index].displayname;
-                                          _focusNode.unfocus();
-                                          _options.clear();
-                                          setState(() {});
-                                        },
-                                      );
-                                    },
-                                  ),
-                                );
-                              }),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -486,7 +503,7 @@ class _OpenStreetMapSearchAndPickState
                   ],
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
             ],

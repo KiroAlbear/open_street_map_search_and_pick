@@ -76,6 +76,14 @@ class _MyHomePageState extends State<MyHomePage> {
           buttonWidth: double.infinity,
           latitude: 37.7749,
           longitude: -122.4194,
+          searchSuffixIcon: const Icon(
+            Icons.search,
+            color: Colors.black,
+          ),
+          backArrowWidget: const Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+          ),
           onPicked: (pickedData) {
             print(pickedData.latLong.latitude);
             print(pickedData.latLong.longitude);
