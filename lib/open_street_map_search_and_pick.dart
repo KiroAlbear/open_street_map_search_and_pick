@@ -23,6 +23,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   final Color? searchBorderColor;
   final String locationPinText;
   final TextStyle locationPinTextStyle;
+  final TextStyle? hintStyle;
   final String buttonText;
   final String hintText;
   final double buttonHeight;
@@ -53,6 +54,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
       this.textFieldProgressBarColor = Colors.blue,
       this.locationPinText = 'Location',
       this.setLocationButtonBorderRadious = 100,
+      this.hintStyle,
       this.locationPinTextStyle = const TextStyle(
           fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
       this.hintText = 'Search Location',
@@ -264,6 +266,7 @@ class _OpenStreetMapSearchAndPickState
                           focusNode: _focusNode,
                           decoration: InputDecoration(
                               hintText: widget.hintText,
+                              hintStyle: widget.hintStyle,
                               border: inputBorder,
                               focusedBorder: inputFocusBorder,
                               enabledBorder: enabledBorder,
