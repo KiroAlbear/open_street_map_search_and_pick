@@ -28,7 +28,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   final double buttonWidth;
   final TextStyle buttonTextStyle;
   final String baseUri;
-  final double mapHeight;
+  // final double mapHeight;
   final double setLocationButtonBorderRadious;
   final double? longitude;
   final double? latitude;
@@ -38,7 +38,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   const OpenStreetMapSearchAndPick(
       {Key? key,
       required this.onPicked,
-      this.mapHeight = 300,
+      // this.mapHeight = 300,
       this.zoomOutIcon = Icons.zoom_out_map,
       this.zoomInIcon = Icons.zoom_in_map,
       this.currentLocationIcon = Icons.my_location,
