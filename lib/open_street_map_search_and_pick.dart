@@ -20,6 +20,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   final Color buttonTextColor;
   final Color textFieldProgressBarColor;
   final Color locationPinIconColor;
+  final Color? searchBorderColor;
   final String locationPinText;
   final TextStyle locationPinTextStyle;
   final String buttonText;
@@ -66,6 +67,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
       this.latitude,
       this.longitude,
       this.searchSuffixIcon,
+      this.searchBorderColor,
       this.backArrowWidget})
       : super(key: key);
 
@@ -214,13 +216,16 @@ class _OpenStreetMapSearchAndPickState
   Widget build(BuildContext context) {
     // String? _autocompleteSelection;
     OutlineInputBorder inputBorder = OutlineInputBorder(
-      borderSide: BorderSide(color: widget.buttonColor),
+      borderSide:
+          BorderSide(color: widget.searchBorderColor ?? const Color(0xf000000)),
     );
     OutlineInputBorder enabledBorder = const OutlineInputBorder(
       borderSide: BorderSide(color: Color(0xffE1E1E1)),
     );
     OutlineInputBorder inputFocusBorder = OutlineInputBorder(
-      borderSide: BorderSide(color: widget.buttonColor, width: 3.0),
+      borderSide: BorderSide(
+          color: widget.searchBorderColor ?? const Color(0xf000000),
+          width: 1.0),
     );
     return FutureBuilder<Position?>(
       future: latlongFuture,
