@@ -36,7 +36,7 @@ dependencies:
   open_street_map_search_and_pick:
     path: ..
   geolocator: ^10.1.0
-  permission_handler: ^10.2.0
+  permission_handler: ^12.0.1
   latlong2: ^0.9.0
 
 dev_dependencies:
