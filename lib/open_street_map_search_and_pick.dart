@@ -35,6 +35,11 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   final Widget? backArrowWidget;
   final Widget? searchSuffixIcon;
 
+  final Map<String, String> _headers = const {
+    "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+  };
+
   const OpenStreetMapSearchAndPick(
       {Key? key,
       required this.onPicked,
@@ -136,7 +141,7 @@ class _OpenStreetMapSearchAndPickState
     String url =
         '${widget.baseUri}/reverse?format=json&lat=$latitude&lon=$longitude&zoom=18&addressdetails=1';
 
-    var response = await client.get(Uri.parse(url));
+    var response = await client.get(Uri.parse(url), headers: widget._headers);
     // var response = await client.post(Uri.parse(url));
     var decodedResponse =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
@@ -157,7 +162,7 @@ class _OpenStreetMapSearchAndPickState
     String url =
         '${widget.baseUri}/reverse?format=json&lat=$latitude&lon=$longitude&zoom=18&addressdetails=1';
 
-    var response = await client.get(Uri.parse(url));
+    var response = await client.get(Uri.parse(url), headers: widget._headers);
     // var response = await client.post(Uri.parse(url));
     var decodedResponse =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
@@ -178,7 +183,8 @@ class _OpenStreetMapSearchAndPickState
               '${widget.baseUri}/reverse?format=json&lat=${event.camera.center.latitude}&lon=${event.camera.center.longitude}&zoom=18&addressdetails=1';
           _isLocationLoading.value = true;
 
-          var response = await client.get(Uri.parse(url));
+          var response =
+              await client.get(Uri.parse(url), headers: widget._headers);
           // var response = await client.post(Uri.parse(url));
           var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes))
               as Map<dynamic, dynamic>;
@@ -295,10 +301,6 @@ class _OpenStreetMapSearchAndPickState
                                 print(value);
                               }
                               var client = http.Client();
-                              Map<String, String> headers = {
-                                "User-Agent":
-                                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
-                              };
                               try {
                                 String url =
                                     '${widget.baseUri}/search?q=$value&format=json&polygon_geojson=1&addressdetails=1';
@@ -307,7 +309,7 @@ class _OpenStreetMapSearchAndPickState
                                 }
                                 _isLocationLoading.value = true;
                                 var response = await client.get(Uri.parse(url),
-                                    headers: headers);
+                                    headers: widget._headers);
                                 // var response = await client.post(Uri.parse(url));
                                 var decodedResponse =
                                     jsonDecode(utf8.decode(response.bodyBytes))
@@ -520,7 +522,7 @@ class _OpenStreetMapSearchAndPickState
     String url =
         '${widget.baseUri}/reverse?format=json&lat=${_mapController.camera.center.latitude}&lon=${_mapController.camera.center.longitude}&zoom=18&addressdetails=1';
 
-    var response = await client.get(Uri.parse(url));
+    var response = await client.get(Uri.parse(url), headers: widget._headers);
     // var response = await client.post(Uri.parse(url));
     var decodedResponse =
         jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
