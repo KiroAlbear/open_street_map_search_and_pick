@@ -278,40 +278,40 @@ class _OpenStreetMapSearchAndPickState
                         ),
                       ),
                     ),
+                    // Positioned(
+                    //   bottom: 180 - actionButtonsShiftingValues,
+                    //   right: 5,
+                    //   child: FloatingActionButton(
+                    //     heroTag: 'btn1',
+                    //     backgroundColor: widget.buttonColor,
+                    //     onPressed: () {
+                    //       _mapController.move(_mapController.camera.center,
+                    //           _mapController.camera.zoom + 1);
+                    //     },
+                    //     child: Icon(
+                    //       widget.zoomInIcon,
+                    //       color: widget.buttonTextColor,
+                    //     ),
+                    //   ),
+                    // ),
+                    // Positioned(
+                    //   bottom: 120 - actionButtonsShiftingValues,
+                    //   right: 5,
+                    //   child: FloatingActionButton(
+                    //     heroTag: 'btn2',
+                    //     backgroundColor: widget.buttonColor,
+                    //     onPressed: () {
+                    //       _mapController.move(_mapController.camera.center,
+                    //           _mapController.camera.zoom - 1);
+                    //     },
+                    //     child: Icon(
+                    //       widget.zoomOutIcon,
+                    //       color: widget.buttonTextColor,
+                    //     ),
+                    //   ),
+                    // ),
                     Positioned(
-                      bottom: 180 - actionButtonsShiftingValues,
-                      right: 5,
-                      child: FloatingActionButton(
-                        heroTag: 'btn1',
-                        backgroundColor: widget.buttonColor,
-                        onPressed: () {
-                          _mapController.move(_mapController.camera.center,
-                              _mapController.camera.zoom + 1);
-                        },
-                        child: Icon(
-                          widget.zoomInIcon,
-                          color: widget.buttonTextColor,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 120 - actionButtonsShiftingValues,
-                      right: 5,
-                      child: FloatingActionButton(
-                        heroTag: 'btn2',
-                        backgroundColor: widget.buttonColor,
-                        onPressed: () {
-                          _mapController.move(_mapController.camera.center,
-                              _mapController.camera.zoom - 1);
-                        },
-                        child: Icon(
-                          widget.zoomOutIcon,
-                          color: widget.buttonTextColor,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 60 - actionButtonsShiftingValues,
+                      bottom: 90 - actionButtonsShiftingValues,
                       right: 5,
                       child: FloatingActionButton(
                         heroTag: 'btn3',
@@ -384,6 +384,10 @@ class _OpenStreetMapSearchAndPickState
                                       print(value);
                                     }
                                     var client = http.Client();
+                                    Map<String, String> headers = {
+                                      "User-Agent":
+                                          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+                                    };
                                     try {
                                       String url =
                                           '${widget.baseUri}/search?q=$value&format=json&polygon_geojson=1&addressdetails=1';
@@ -391,8 +395,9 @@ class _OpenStreetMapSearchAndPickState
                                         print(url);
                                       }
                                       _isLocationLoading.value = true;
-                                      var response =
-                                          await client.get(Uri.parse(url));
+                                      var response = await client.get(
+                                          Uri.parse(url),
+                                          headers: headers);
                                       // var response = await client.post(Uri.parse(url));
                                       var decodedResponse = jsonDecode(
                                               utf8.decode(response.bodyBytes))
@@ -454,30 +459,35 @@ class _OpenStreetMapSearchAndPickState
                         ),
                       ),
                     ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: SizedBox(
+                        height: widget.buttonHeight,
+                        width: widget.buttonWidth,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: WideButton(
+                            widget.buttonText,
+                            setLocationButtonBorderRadious:
+                                widget.setLocationButtonBorderRadious,
+                            textStyle: widget.buttonTextStyle,
+                            onPressed: () async {
+                              final value = await pickData();
+                              widget.onPicked(value);
+                            },
+                            backgroundColor: widget.buttonColor,
+                            foregroundColor: widget.buttonTextColor,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
               SizedBox(
                 height: 10,
-              ),
-              SizedBox(
-                height: widget.buttonHeight,
-                width: widget.buttonWidth,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: WideButton(
-                    widget.buttonText,
-                    setLocationButtonBorderRadious:
-                        widget.setLocationButtonBorderRadious,
-                    textStyle: widget.buttonTextStyle,
-                    onPressed: () async {
-                      final value = await pickData();
-                      widget.onPicked(value);
-                    },
-                    backgroundColor: widget.buttonColor,
-                    foregroundColor: widget.buttonTextColor,
-                  ),
-                ),
               ),
             ],
           ),
