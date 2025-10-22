@@ -65,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
         ),
         body: OpenStreetMapSearchAndPick(
-          mapHeight: 400,
           buttonTextColor: Colors.white,
           buttonTextStyle:
               const TextStyle(fontSize: 18, fontStyle: FontStyle.normal),
@@ -76,6 +75,9 @@ class _MyHomePageState extends State<MyHomePage> {
           buttonWidth: double.infinity,
           latitude: 37.7749,
           longitude: -122.4194,
+          buttonLoadingWidget: const CircularProgressIndicator(
+            color: Colors.white,
+          ),
           searchSuffixIcon: const Icon(
             Icons.search,
             color: Colors.black,

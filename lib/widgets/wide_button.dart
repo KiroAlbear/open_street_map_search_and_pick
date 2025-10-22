@@ -5,8 +5,10 @@ class WideButton extends StatelessWidget {
     this.text, {
     Key? key,
     required,
+    this.isLoading = false,
     this.padding = 0.0,
     this.height = 45,
+    this.loadingWidget,
     required this.onPressed,
     this.backgroundColor = Colors.blue,
     this.foregroundColor = Colors.white,
@@ -20,11 +22,13 @@ class WideButton extends StatelessWidget {
   final double padding;
   final double height;
   final double width;
+  final bool isLoading;
   final Color backgroundColor;
   final TextStyle textStyle;
   final Color foregroundColor;
   final double setLocationButtonBorderRadious;
   final void Function() onPressed;
+  final Widget? loadingWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +48,14 @@ class WideButton extends StatelessWidget {
                   BorderRadius.circular(setLocationButtonBorderRadious),
             ),
           ),
-          onPressed: onPressed,
-          child: Text(text, style: textStyle),
+          onPressed: () {
+            if (!isLoading) {
+              onPressed();
+            }
+          },
+          child: isLoading && loadingWidget != null
+              ? loadingWidget
+              : Text(text, style: textStyle),
         ),
       ),
     );

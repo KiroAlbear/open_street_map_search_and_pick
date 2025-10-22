@@ -36,6 +36,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   final double? latitude;
   final Widget? backArrowWidget;
   final Widget? searchSuffixIcon;
+  final Widget? buttonLoadingWidget;
 
   final Map<String, String> _headers = const {
     "User-Agent":
@@ -70,6 +71,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
       this.longitude,
       this.searchSuffixIcon,
       this.searchBorderColor,
+      this.buttonLoadingWidget,
       this.backArrowWidget})
       : super(key: key);
 
@@ -89,6 +91,7 @@ class _OpenStreetMapSearchAndPickState
   late Future<Position?> latlongFuture;
   final ValueNotifier<bool> _isLocationLoading = ValueNotifier(false);
   late final Position _currentLocation;
+  final ValueNotifier<bool> _isLoadingNotifier = ValueNotifier(false);
 
   Future<Position?> getCurrentPosLatLong() async {
     LocationPermission locationPermission = await Geolocator.checkPermission();
@@ -495,17 +498,26 @@ class _OpenStreetMapSearchAndPickState
                         width: widget.buttonWidth,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: WideButton(
-                            widget.buttonText,
-                            setLocationButtonBorderRadious:
-                                widget.setLocationButtonBorderRadious,
-                            textStyle: widget.buttonTextStyle,
-                            onPressed: () async {
-                              final value = await pickData();
-                              widget.onPicked(value);
+                          child: ValueListenableBuilder<bool>(
+                            valueListenable: _isLoadingNotifier,
+                            builder: (context, value, child) {
+                              return WideButton(
+                                widget.buttonText,
+                                loadingWidget: widget.buttonLoadingWidget,
+                                isLoading: value,
+                                setLocationButtonBorderRadious:
+                                    widget.setLocationButtonBorderRadious,
+                                textStyle: widget.buttonTextStyle,
+                                onPressed: () async {
+                                  _isLoadingNotifier.value = true;
+                                  final value = await pickData();
+                                  widget.onPicked(value);
+                                  _isLoadingNotifier.value = false;
+                                },
+                                backgroundColor: widget.buttonColor,
+                                foregroundColor: widget.buttonTextColor,
+                              );
                             },
-                            backgroundColor: widget.buttonColor,
-                            foregroundColor: widget.buttonTextColor,
                           ),
                         ),
                       ),
