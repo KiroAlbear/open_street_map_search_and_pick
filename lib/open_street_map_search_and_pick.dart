@@ -15,11 +15,10 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
   final IconData zoomInIcon;
   final IconData zoomOutIcon;
   final IconData currentLocationIcon;
-  final IconData locationPinIcon;
+  final Widget? locationPinIcon;
   final Color buttonColor;
   final Color buttonTextColor;
   final Color textFieldProgressBarColor;
-  final Color locationPinIconColor;
   final Color? searchBorderColor;
   final String locationPinText;
   final TextStyle locationPinTextStyle;
@@ -51,7 +50,6 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
       this.zoomInIcon = Icons.zoom_in_map,
       this.currentLocationIcon = Icons.my_location,
       this.buttonColor = Colors.blue,
-      this.locationPinIconColor = Colors.blue,
       this.textFieldProgressBarColor = Colors.blue,
       this.locationPinText = 'Location',
       this.setLocationButtonBorderRadious = 100,
@@ -66,7 +64,7 @@ class OpenStreetMapSearchAndPick extends StatefulWidget {
       this.buttonHeight = 50,
       this.buttonWidth = 200,
       this.baseUri = 'https://nominatim.openstreetmap.org',
-      this.locationPinIcon = Icons.location_on,
+      this.locationPinIcon ,
       this.latitude,
       this.longitude,
       this.searchSuffixIcon,
@@ -386,11 +384,7 @@ class _OpenStreetMapSearchAndPickState
                                   textAlign: TextAlign.center),
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 50),
-                                child: Icon(
-                                  widget.locationPinIcon,
-                                  size: 50,
-                                  color: widget.locationPinIconColor,
-                                ),
+                                child: widget.locationPinIcon,
                               ),
                             ],
                           ),
